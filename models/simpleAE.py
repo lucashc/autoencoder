@@ -32,11 +32,29 @@ class AE(nn.Module):
         return x
 
 if __name__ == "__main__":
+
+    # Helper function
+    def make_img(x):
+        x = 0.5 * (x + 1)
+        # If above 1, make one, if below 0 make 0
+        x = x.clamp(0, 1)
+        # View is like reshape
+        x = x.view(x.size(0), 1, 28, 28)
+        return x
+
+
+    # Settings
+    batch_size = 128
+    epochs = 20
+    save_imgs = True
+    every = 1
+
     from torchvision.datasets import MNIST # Dataset
     from torchvision import transforms # Transforms for the dataset
     from torch.utils.data import DataLoader # Class that handles loading of data from class that implements: 
         # __get_item__ and __len__, it also allows parallel loading if data, and implements batches
     from torch.autograd import Variable # Tensors of this type, keep history of gradient functions
+    from torchvision.utils import save_image # Image helper
     from tqdm import tqdm # Progressbars
     # Define model, metrics and optimizers
     model = AE()
@@ -53,10 +71,10 @@ if __name__ == "__main__":
 
     # Load data
     dataset = MNIST('./data', transform=img_transform, download=True)
-    dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
     # Run training
-    for epoch in tqdm(range(100)):
+    for epoch in tqdm(range(epochs)):
         for data in dataloader:
             img, _ = data
             img = Variable(img)
@@ -72,6 +90,9 @@ if __name__ == "__main__":
             # Update
             optimizer.step()
         tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
+        if epoch % every == 0 and save_imgs:
+            img = make_img(output.data)
+            save_image(img, f"./image_{epoch}.png")
     torch.save(model.state_dict(), "./conv_autoencoder.pth")
 
 
