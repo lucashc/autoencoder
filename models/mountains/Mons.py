@@ -14,10 +14,11 @@ class Mons(nn.Module):
 			nn.MaxPool(2, stride=2) # (N x 128 x 1 x 1)
 		)
 		self.decoder = nn.Sequential(
-			nn.ConvTranspose2d(128, 64, 16, stride=16),
-			nn.ConvTranspose2d(64, 32, , stride=,padding=),
-			nn.ConvTranspose2d(32, 16, , stride=,padding=),
-			nn.ConvTranspose2d(16, 1, , stride=, padding=)
+			nn.ConvTranspose2d(128, 128, 4, stride=4),
+			nn.ConvTranspose2d(128, 64, 4, stride=4),
+			nn.ConvTranspose2d(64, 32, 4, stride=2),
+			nn.ConvTranspose2d(32, 16, 4, stride=4),
+			nn.ConvTranspose2d(16, 1, 4, stride=4)
 		)
 
 	def forward(self, x):
