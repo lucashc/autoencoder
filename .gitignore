@@ -109,3 +109,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# processed data from mountains
+testcases/mountains/data/*
+testcases/mountains/dataset/*
+testcases/mountains/npys/*
+
