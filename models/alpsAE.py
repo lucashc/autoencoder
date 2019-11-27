@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .datasets.alps import Alps
+from datasets.alps import Alps
 import numpy as np
 
 class AE(nn.Module):
