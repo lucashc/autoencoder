@@ -12,17 +12,17 @@ class AE(nn.Module):
         super().__init__()
         self.encoder = nn.Sequential(
                 # Input is (N, 1, 512, 512)
-                nn.Conv2d(1, 16, 2, stride=2), # Shape (N, 16, 256, 256)
-                nn.MaxPool2d(2, stride=2), # Shape (N, 16, 128, 128)
-                nn.Conv2d(16, 8, 2, stride=2), # Shape (N, 8, 64, 64)
-                nn.MaxPool2d(2, stride=2) # Shape (N, 8, 32, 32)
+                nn.Conv2d(1, 16, 4, stride=2), # Shape (N, 8, 256, 256)
+                nn.MaxPool2d(2, stride=2), # Shape (N, 8, 128, 128)
+                nn.Conv2d(16, 32, 2, stride=2), # Shape (N, 16, 64, 64)
+                nn.MaxPool2d(2, stride=2) # Shape (N, 16, 32, 32)
             )
         self.decoder = nn.Sequential(
                 # Transpose convolution operator
-                nn.ConvTranspose2d(8, 16, 2, stride=2), # Shape (N, 16, 64, 64)
-                nn.ConvTranspose2d(16, 8, 2, stride=2), # Shape (N, 8, 128, 128)
-                nn.ConvTranspose2d(8, 2, 2, stride=2), # Shape (N, 2, 256, 256)
-                nn.ConvTranspose2d(2, 1, 2, stride=2) # Shape (N, 1, 512, 512)
+                nn.ConvTranspose2d(32, 16, 3, stride=2), # Shape (N, 16, 64, 64)
+                nn.ConvTranspose2d(16, 12, 3, stride=2), # Shape (N, 8, 128, 128)
+                nn.ConvTranspose2d(12, 8, 4, stride=2), # Shape (N, 2, 256, 256)
+                nn.ConvTranspose2d(8, 1, 4, stride=2, padding=1) # Shape (N, 1, 512, 512)
             )
         
     def forward(self, x):
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # Settings
     batch_size = 128
-    epochs = 20
+    epochs = 50
 
     from torchvision import transforms # Transforms for the dataset
     from torch.utils.data import DataLoader # Class that handles loading of data from class that implements: 
@@ -75,6 +75,8 @@ if __name__ == "__main__":
             # Update
             optimizer.step()
         tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
+        np.save(f"{epoch}.npy", output.data.numpy())
     torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
+    show = output.data
 
 
