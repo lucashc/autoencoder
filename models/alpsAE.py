@@ -37,6 +37,7 @@ if __name__ == "__main__":
     epochs = 50
 
     from torchvision import transforms # Transforms for the dataset
+    import torchvision.transforms.functional as F_trans # Functional transforms
     from torch.utils.data import DataLoader # Class that handles loading of data from class that implements: 
         # __get_item__ and __len__, it also allows parallel loading if data, and implements batches
     from torch.autograd import Variable # Tensors of this type, keep history of gradient functions
@@ -51,6 +52,13 @@ if __name__ == "__main__":
         transforms.Lambda(lambda x: x.astype(np.float32)/6000), # Normalize and make floats
         transforms.ToPILImage(), # Allows us to use other transforms
         transforms.RandomCrop((512, 512)), # Take random crops of size 512x512
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomChoice([
+            transforms.Lambda(lambda x: F_trans.rotate(x, 90)),
+            transforms.Lambda(lambda x: F_trans.rotate(x, -90)),
+            transforms.Lambda(lambda x: F_trans.rotate(x, 180)),
+            transforms.Lambda(lambda x: x)
+        ]),
         transforms.ToTensor(), # Converts PIL-images to torch tensors
     ])
 
@@ -75,7 +83,6 @@ if __name__ == "__main__":
             # Update
             optimizer.step()
         tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
-        np.save(f"{epoch}.npy", output.data.numpy())
     torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
     show = output.data
 
