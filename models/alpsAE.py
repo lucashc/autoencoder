@@ -51,10 +51,16 @@ if __name__ == "__main__":
 		# __get_item__ and __len__, it also allows parallel loading if data, and implements batches
 	from torch.autograd import Variable # Tensors of this type, keep history of gradient functions
 	from tqdm import tqdm # Progressbars
+	import sys
 	# Define model, metrics and optimizers
-	model = AE()
+	if len(sys.argv) > 1:
+		model = AE()
+		model.load_state_dict(torch.load(sys.argv[1]))
+		model.eval()
+	else:
+		model = AE()
 	criterion = nn.MSELoss()
-	optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+	optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
 	# Transform images
 	img_transform = transforms.Compose([
