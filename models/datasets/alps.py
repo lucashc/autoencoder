@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 from torch.utils.data import Dataset
 import torch
+from shutil import rmtree
 
 
 BASE_URL = "http://www.viewfinderpanoramas.org/dem1/"
@@ -64,6 +65,7 @@ class Alps(Dataset):
                 open(os.path.join(self.data_dir, "data.lock"), 'a').close()
                 self.download_files()
                 self.process()
+                rmtree(self.tiles)
             else:
                 raise FileNotFoundError("No lock file found")
         self.filelist = sorted(os.listdir(self.npys), key=lambda f: int(f[:-4]))
@@ -93,7 +95,7 @@ class Alps(Dataset):
     def load(self):
         print("Loading in memory")
         for file in tqdm(self.filelist):
-            self.data.append(np.load(os.path.join(self.npys, file)))
+            self.data.append(np.load(os.path.join(self.npys, file))['data'])
         print("Loaded")
 
     @staticmethod
@@ -116,7 +118,7 @@ class Alps(Dataset):
             if self.in_memory:
                 sample = self.data[file_index][y[0]:y[1], x[0]:x[1]]
             else:
-                sample = np.load(os.path.join(self.npys, self.filelist[file_index]))[y[0]:y[1], x[0]:x[1]]
+                sample = np.load(os.path.join(self.npys, self.filelist[file_index]))['data'][y[0]:y[1], x[0]:x[1]]
             if self.check_corruption(sample, self.land_percentage):
                 self.indices.remove(index)
                 removals += 1
@@ -127,8 +129,8 @@ class Alps(Dataset):
     def process(self):
         print("Unpacking binary files...")
         for index, file in tqdm(enumerate(os.listdir(self.tiles))):
-            data = self.unpack_file(os.path.join(self.tiles, file)).astype(int)
-            np.save(os.path.join(self.npys, f"{index}.npy"), data)
+            data = self.unpack_file(os.path.join(self.tiles, file)).astype(np.float32)
+            np.savez_compressed(os.path.join(self.npys, f"{index}.npz"), data=data)
         print("Unpacking done")
     
     def __len__(self):
@@ -156,7 +158,7 @@ class Alps(Dataset):
         if self.in_memory:
             sample = self.data[file_index][y[0]:y[1], x[0]:x[1]]
         else:
-            sample = np.load(os.path.join(self.npys, self.filelist[file_index]))[y[0]:y[1], x[0]:x[1]]
+            sample = np.load(os.path.join(self.npys, self.filelist[file_index]))['data'][y[0]:y[1], x[0]:x[1]]
         if self.transform:
             sample = self.transform(sample)
         return sample
