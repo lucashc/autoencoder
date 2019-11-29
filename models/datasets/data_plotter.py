@@ -49,5 +49,5 @@ if __name__=='__main__':
 		print(arg)
 		dic = np.load(arg)
 		for original, decoded in zip(dic["input"], dic["output"]):
-			display_set([original, decoded], map2d)
+			display_set([original, decoded], shadow_map, map2d)
 
