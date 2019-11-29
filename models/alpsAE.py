@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from datasets.alps import Alps
+from .datasets.alps import Alps
 import numpy as np
 
 class AE(nn.Module):
@@ -12,17 +12,24 @@ class AE(nn.Module):
         super().__init__()
         self.encoder = nn.Sequential(
                 # Input is (N, 1, 512, 512)
-                nn.Conv2d(1, 16, 4, stride=2), # Shape (N, 8, 256, 256)
-                nn.MaxPool2d(2, stride=2), # Shape (N, 8, 128, 128)
-                nn.Conv2d(16, 32, 2, stride=2), # Shape (N, 16, 64, 64)
+                nn.Conv2d(1, 16, 3, padding=1), # Shape (N, 16, 512, 512)
+                nn.ReLU(),
+                nn.MaxPool2d(2, stride=2), # Shape (N, 16, 256, 256)
+                nn.Conv2d(16, 32, 3, padding=1), # Shape (N, 32, 256, 256)
+                nn.ReLU(),
+                nn.MaxPool2d(2, stride=2), # Shape (N, 32, 128, 128)
+                nn.Conv2d(32, 32, 3, padding=1), # Shape (N, 32, 128, 128)
+                nn.ReLU(),
+                nn.MaxPool2d(2, stride=2), # Shape (N, 32, 64, 64)
+                nn.Conv2d(32, 16, 3, padding=1), # Shape (N, 16, 64, 64)
                 nn.MaxPool2d(2, stride=2) # Shape (N, 16, 32, 32)
             )
         self.decoder = nn.Sequential(
                 # Transpose convolution operator
-                nn.ConvTranspose2d(32, 16, 3, stride=2), # Shape (N, 16, 64, 64)
-                nn.ConvTranspose2d(16, 12, 3, stride=2), # Shape (N, 8, 128, 128)
-                nn.ConvTranspose2d(12, 8, 4, stride=2), # Shape (N, 2, 256, 256)
-                nn.ConvTranspose2d(8, 1, 4, stride=2, padding=1) # Shape (N, 1, 512, 512)
+                nn.ConvTranspose2d(16, 32, 4, stride=2, padding=1), # Shape (N, 32, 64, 64)
+                nn.ConvTranspose2d(32, 32, 4, stride=2, padding=1), # Shape (N, 32, 128, 128)
+                nn.ConvTranspose2d(32, 16, 4, stride=2, padding=1), # Shape (N, 32, 256 256) 
+                nn.ConvTranspose2d(16, 1, 4, stride=2, padding=1) # Shape (N, 32, 512, 512)  
             )
         
     def forward(self, x):
