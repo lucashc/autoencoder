@@ -76,25 +76,28 @@ if __name__ == "__main__":
 	dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 	
 	# Run training
-	for epoch in tqdm(range(epochs)):
-		for data in dataloader:
-			img = data
-			img = Variable(img)
-			# Make forward pass
-			output = model(img)
-			# Determine loss
-			loss = criterion(output, img)
-			# Backward
-			# Reset gradients
-			optimizer.zero_grad()
-			# Do backpropagation
-			loss.backward()
-			# Update
-			optimizer.step()
-		tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
-		if save:
-			x = len(str(epochs))
-			np.savez(f"{epoch:0{x}}", output=output.data.numpy(), input=img.data.numpy())
-	torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
+	try:
+		for epoch in tqdm(range(epochs)):
+			for data in dataloader:
+				img = data
+				img = Variable(img)
+				# Make forward pass
+				output = model(img)
+				# Determine loss
+				loss = criterion(output, img)
+				# Backward
+				# Reset gradients
+				optimizer.zero_grad()
+				# Do backpropagation
+				loss.backward()
+				# Update
+				optimizer.step()
+			tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
+			if save:
+				x = len(str(epochs))
+				np.savez(f"{epoch:0{x}}", output=output.data.numpy(), input=img.data.numpy())
+		torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
+	except KeyboardInterrupt:
+		torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
 
 
