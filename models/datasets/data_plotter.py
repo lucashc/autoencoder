@@ -8,9 +8,10 @@ import sys
 def datalist():
 	return map(lambda x: np.load(os.path.join("./npys", x)), os.listdir("./npys"))
 def display_set(data, *args):
-	for ind, func in enumerate(args):
-		ax = plt.subplot(1, len(args), 1 + ind)
-		func(data)
+	for jnd, img in enumerate(data):
+		for ind, func in enumerate(args):
+			ax = plt.subplot(len(args), len(data), 1 + len(data)*ind + jnd)
+			func(img[0])
 	plt.show()
 
 def iterate_data(*args):
@@ -46,6 +47,7 @@ def map3d(data, colour=cm.jet):
 if __name__=='__main__':
 	for arg in sys.argv[1:]:
 		print(arg)
-		for image in np.load(arg):
-			display_set(image[0], map2d)
+		dic = np.load(arg)
+		for original, decoded in zip(dic["input"], dic["output"]):
+			display_set([original, decoded], map2d)
 
