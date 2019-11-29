@@ -14,15 +14,23 @@ class AE(nn.Module):
                 # Input is (N, 1, 512, 512)
                 nn.Conv2d(1, 16, 4, stride=2), # Shape (N, 8, 256, 256)
                 nn.MaxPool2d(2, stride=2), # Shape (N, 8, 128, 128)
+                nn.ReLu(),
                 nn.Conv2d(16, 32, 2, stride=2), # Shape (N, 16, 64, 64)
                 nn.MaxPool2d(2, stride=2) # Shape (N, 16, 32, 32)
+                nn.ReLu()
             )
         self.decoder = nn.Sequential(
                 # Transpose convolution operator
                 nn.ConvTranspose2d(32, 16, 3, stride=2), # Shape (N, 16, 64, 64)
+                nn.ReLu(),
                 nn.ConvTranspose2d(16, 12, 3, stride=2), # Shape (N, 8, 128, 128)
+                nn.ReLu(),
                 nn.ConvTranspose2d(12, 8, 4, stride=2), # Shape (N, 2, 256, 256)
-                nn.ConvTranspose2d(8, 1, 4, stride=2, padding=1) # Shape (N, 1, 512, 512)
+                nn.ReLu(),
+                nn.ConvTranspose2d(8, 4, 4, stride=2, padding=1), # Shape (N, 1, 512, 512)
+                nn.ReLu(),
+                nn.ConvTranspose2d(4, 1, 3, stride=1, padding=1) # Shape (N, 1, 512, 512)
+                nn.ReLu()
             )
         
     def forward(self, x):
@@ -49,13 +57,11 @@ if __name__ == "__main__":
     # Transform images
     img_transform = transforms.Compose([
         transforms.Lambda(lambda x: x.astype(np.float32)/6000), # Normalize and make floats
-        transforms.ToPILImage(), # Allows us to use other transforms
-        transforms.RandomCrop((512, 512)), # Take random crops of size 512x512
         transforms.ToTensor(), # Converts PIL-images to torch tensors
     ])
 
     # Load data
-    dataset = Alps('./alps', download=True, in_memory=True, resolution=1024, transform=img_transform)
+    dataset = Alps('./alps', download=True, in_memory=True, resolution=512, transform=img_transform)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
     # Run training
@@ -75,8 +81,8 @@ if __name__ == "__main__":
             # Update
             optimizer.step()
         tqdm.write(f"Epoch {epoch}, loss = {loss.item():.4f}")
-        np.save(f"{epoch}.npy", output.data.numpy())
+        x = len(str(epochs))
+        np.save(f"{epoch:0{x}}.npy", output.data.numpy())
     torch.save(model.state_dict(), "./conv_alps_autoencoder.pth")
-    show = output.data
 
 
