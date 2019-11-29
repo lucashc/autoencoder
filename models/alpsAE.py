@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
 	# Transform images
 	img_transform = transforms.Compose([
-		transforms.Lambda(lambda x: x.astype(np.float32)/6000), # Normalize and make floats
+		transforms.Lambda(lambda x: x.astype(np.float32)/704), # Normalize and make floats
 		transforms.ToPILImage(), # Allows us to use other transforms
 		transforms.RandomCrop((512, 512)), # Take random crops of size 512x512
 		transforms.RandomHorizontalFlip(),
