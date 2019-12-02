@@ -114,7 +114,7 @@ class Alps(Dataset):
         removals = 0
         print("Pruning corrupted sectors")
         for index in tqdm(self.indices.copy()):
-            file_index, tile_index, y, x = self.calculate_file_tile(index)
+            file_index, _, y, x = self.calculate_file_tile(index)
             if self.in_memory:
                 sample = self.data[file_index][y[0]:y[1], x[0]:x[1]]
             else:
